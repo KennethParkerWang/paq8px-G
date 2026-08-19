@@ -1,4 +1,5 @@
 ﻿#include "../MixerFactory.hpp"
+#include "../DummyMixer.hpp"
 #include "../Models.hpp"
 
 class ContextModelGeneric: public IContextModel {
@@ -7,9 +8,20 @@ private:
   Shared* const shared;
   Models* const models;
   Mixer* m;
+  DummyMixer linearPredictionDummyMixer;
+
+  static void addNeutralInputs(Mixer& mixer, const int count) {
+    for (int i = 0; i < count; ++i) {
+      mixer.add(0);
+    }
+  }
 
 public:
-  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) : shared(sh), models(models) {
+  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) :
+      shared(sh),
+      models(models),
+      m(nullptr),
+      linearPredictionDummyMixer(sh, LinearPredictionModel::MIXERINPUTS, 1, 1) {
     const bool useLSTM = shared->GetOptionUseLSTM();
     m = mf->createMixer(
       1 +  //bias
@@ -85,7 +97,9 @@ public:
     xmlModel.mix(*m);
 
     LinearPredictionModel& linearPredictionModel = models->linearPredictionModel();
-    linearPredictionModel.mix(*m);
+    linearPredictionModel.mix(linearPredictionDummyMixer);
+    linearPredictionDummyMixer.p();
+    addNeutralInputs(*m, LinearPredictionModel::MIXERINPUTS);
 
     SimilarityModelPair& similarityModelPair = models->similarityModelPair();
     similarityModelPair.mix(*m);
