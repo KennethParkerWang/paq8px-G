@@ -14,6 +14,7 @@ RecordModel::RecordModel(Shared* const sh, const uint64_t size) : shared(sh),
     iMap{ /* IndirectMap :  BitsOfContext, InputBits, Scale, Limit */
       {sh,8,8,86,255}, {sh,8,8,86,255}, {sh,8,8,86,255}
     },
+    legacyNumericMapsDummyMixer(sh, nLegacyNumericMixerInputs, 1, 1),
     iCtx{ // IndirectContext :  BitsPerContext, InputBits
       {16,8}, {16,8}, {16,8}, {20,8}, {11,1}
     }
@@ -29,7 +30,11 @@ void RecordModel::getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]
   predictions[2] = static_cast<short>(3 * N - 3 * NN + NNN);
 }
 
-void RecordModel::mix(Mixer &m) {
+void RecordModel::mix(Mixer &m, const uint8_t neutralizeLegacyNumericMask) {
+
+  const uint8_t activeNeutralizeMask =
+    neutralizeLegacyNumericMask & NEUTRALIZE_LEGACY_NUMERIC_MASK;
+  assert(activeNeutralizeMask == neutralizeLegacyNumericMask);
 
   INJECT_SHARED_blockType
   bool isText = isTEXT(blockType);
@@ -249,12 +254,26 @@ void RecordModel::mix(Mixer &m) {
   if (!isText) {
     maps[0].mix(m);
     maps[1].mix(m);
-    maps[2].mix(m);
-    maps[3].mix(m);
-    maps[4].mix(m);
-    iMap[0].mix(m);
-    iMap[1].mix(m);
-    iMap[2].mix(m);
+    const auto mixLegacyNumericMap = [&](auto &map, const uint8_t neutralizeBit, const int mixerInputs) {
+      if ((activeNeutralizeMask & neutralizeBit) != 0) {
+        map.mix(legacyNumericMapsDummyMixer);
+        for (int i = 0; i < mixerInputs; ++i) {
+          m.add(0);
+        }
+      }
+      else {
+        map.mix(m);
+      }
+    };
+    mixLegacyNumericMap(maps[2], NEUTRALIZE_MAP2, StationaryMap::MIXERINPUTS);
+    mixLegacyNumericMap(maps[3], NEUTRALIZE_MAP3, StationaryMap::MIXERINPUTS);
+    mixLegacyNumericMap(maps[4], NEUTRALIZE_MAP4, StationaryMap::MIXERINPUTS);
+    mixLegacyNumericMap(iMap[0], NEUTRALIZE_IMAP0, IndirectMap::MIXERINPUTS);
+    mixLegacyNumericMap(iMap[1], NEUTRALIZE_IMAP1, IndirectMap::MIXERINPUTS);
+    mixLegacyNumericMap(iMap[2], NEUTRALIZE_IMAP2, IndirectMap::MIXERINPUTS);
+    if (activeNeutralizeMask != 0) {
+      legacyNumericMapsDummyMixer.p();
+    }
     sMap[3].mix(m);
   }
   
