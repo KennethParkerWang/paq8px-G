@@ -50,6 +50,8 @@ public:
   void update(uint32_t warmup);
   void mix(Mixer& m);
 
+  uint32_t getRecordLength() const { return record_len; }
+
   // exposed public members for SimilarityModelPair
 
   const size_t MAX_MATCH_DISTANCE; // typically 8192

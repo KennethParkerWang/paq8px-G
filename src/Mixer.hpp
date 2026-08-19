@@ -120,5 +120,8 @@ public:
     */
   void set(uint32_t cx, uint32_t range);
 
+  /** Selects the final context from a dedicated range at the end of the context table. */
+  void setTail(uint32_t cx, uint32_t range);
+
   void reset();
 };

@@ -5,9 +5,19 @@
 class ContextModelGeneric: public IContextModel {
 
 private:
+  enum class StructuralRegime : uint8_t {
+    NoConfirmedExact = 0,
+    ExactAgreement,
+    HarmonicAgreement,
+    Disagreement
+  };
+
+  static constexpr uint32_t STRUCTURAL_REGIMES = 4;
   Shared* const shared;
   Models* const models;
   RecordResidualModel recordResidualModel;
+  StructuralRegime structuralRegime = StructuralRegime::NoConfirmedExact;
+  bool structuralRegimeActive = false;
   Mixer* m;
 
 public:
@@ -30,7 +40,7 @@ public:
       TextModel::MIXERCONTEXTS + WordModel::MIXERCONTEXTS + IndirectModel::MIXERCONTEXTS +
       DmcForest::MIXERCONTEXTS + NestModel::MIXERCONTEXTS + XMLModel::MIXERCONTEXTS +
       LinearPredictionModel::MIXERCONTEXTS + 2 * SimilarityModel::MIXERCONTEXTS + ExeModel::MIXERCONTEXTS +
-      (useLSTM ? LstmModelContainer::MIXERCONTEXTS : 0)
+      (useLSTM ? LstmModelContainer::MIXERCONTEXTS : 0) + STRUCTURAL_REGIMES
       ,
       MatchModel::MIXERCONTEXTSETS + NormalModel::MIXERCONTEXTSETS_PRE + NormalModel::MIXERCONTEXTSETS_POST + SparseMatchModel::MIXERCONTEXTSETS +
       SparseModel::MIXERCONTEXTSETS + SparseBitModel::MIXERCONTEXTSETS + ChartModel::MIXERCONTEXTSETS +
@@ -38,7 +48,7 @@ public:
       TextModel::MIXERCONTEXTSETS + WordModel::MIXERCONTEXTSETS + IndirectModel::MIXERCONTEXTSETS +
       DmcForest::MIXERCONTEXTSETS + NestModel::MIXERCONTEXTSETS + XMLModel::MIXERCONTEXTSETS +
       LinearPredictionModel::MIXERCONTEXTSETS + 2 * SimilarityModel::MIXERCONTEXTSETS + ExeModel::MIXERCONTEXTSETS +
-      (useLSTM ? LstmModelContainer::MIXERCONTEXTSETS : 0)
+      (useLSTM ? LstmModelContainer::MIXERCONTEXTSETS : 0) + 1
       ,
       (useLSTM ? 1 : 0)
     );
@@ -94,9 +104,38 @@ public:
     SimilarityModelPair& similarityModelPair = models->similarityModelPair();
     similarityModelPair.mix(*m);
 
+    INJECT_SHARED_bpos
+    if (bpos == 0) {
+      INJECT_SHARED_blockType
+      structuralRegimeActive = blockType == BlockType::DEFAULT;
+      if (structuralRegimeActive) {
+        if (!recordResidualModel.hasConfirmedRecordLength()) {
+          structuralRegime = StructuralRegime::NoConfirmedExact;
+        }
+        else {
+          const uint32_t exactLength = recordModel.getCurrentRecordLength();
+          const uint32_t similarityLength = similarityModelPair.getSlowRecordLength();
+          if (exactLength == similarityLength) {
+            structuralRegime = StructuralRegime::ExactAgreement;
+          }
+          else if (static_cast<uint64_t>(exactLength) == static_cast<uint64_t>(similarityLength) * 2 ||
+                   static_cast<uint64_t>(similarityLength) == static_cast<uint64_t>(exactLength) * 2) {
+            structuralRegime = StructuralRegime::HarmonicAgreement;
+          }
+          else {
+            structuralRegime = StructuralRegime::Disagreement;
+          }
+        }
+      }
+    }
+
     //exemodel must be the last
     ExeModel& exeModel = models->exeModel();
     exeModel.mix(*m);
+
+    if (structuralRegimeActive) {
+      m->setTail(static_cast<uint32_t>(structuralRegime), STRUCTURAL_REGIMES);
+    }
 
     return m->p();
   }

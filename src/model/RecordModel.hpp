@@ -61,6 +61,7 @@ public:
   RecordModel(Shared* const sh, uint64_t size);
   void setParam(uint32_t fixedRecordLenght);
   void getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]) const;
+  uint32_t getCurrentRecordLength() const { return rLength[0]; }
   bool wasRecordLengthAcceptedThisByte() const { return recordLengthAcceptedThisByte; }
   void mix(Mixer &m, uint8_t neutralizeLegacyNumericMask = 0);
 };

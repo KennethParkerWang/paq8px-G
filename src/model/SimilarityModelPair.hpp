@@ -39,6 +39,7 @@ class SimilarityModelPair
 
 public:
   SimilarityModelPair(Shared* const sh, const uint64_t mem);
+  uint32_t getSlowRecordLength() const { return similarityModel_slow->getRecordLength(); }
   void update();
   void mix(Mixer& m);
 };

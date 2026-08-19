@@ -25,5 +25,6 @@ public:
   static constexpr int MIXERCONTEXTSETS = 0;
 
   RecordResidualModel(const Shared* sh, const RecordModel* recordModel);
+  bool hasConfirmedRecordLength() const { return recordLengthConfirmed; }
   void mix(Mixer& m);
 };

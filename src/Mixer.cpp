@@ -179,6 +179,14 @@ void Mixer::set(const uint32_t cx, const uint32_t range) {
   base += range;
 }
 
+void Mixer::setTail(const uint32_t cx, const uint32_t range) {
+  assert(numContexts < s);
+  assert(cx < range);
+  assert(base + range <= m);
+  cxt[numContexts++] = m - range + cx;
+  base = m;
+}
+
 void Mixer::reset() {
   nx = 0;
   base = 0;
