@@ -9,6 +9,9 @@ Implement the smallest attributable RecordModel reliability conditioning on top 
 - [x] Phase 3: Build Release and assertion-enabled Debug binaries.
 - [x] Phase 4: Run compression/decompression smoke tests and compare bytes.
 - [x] Phase 5: Review the diff, finalize metadata, and commit.
+- [x] Phase 6: Run the formal 36-case prefix benchmark and independent validator.
+- [x] Phase 7: Compare against EXP01A and EXP00, then record the KEEP decision.
+- [x] Phase 8: Generate and validate the three-experiment Experiment Ledger candidate without changing live data.
 
 ## Constraints
 - Keep the three existing P0/P1/P2 predictors unchanged.
@@ -24,10 +27,11 @@ Implement the smallest attributable RecordModel reliability conditioning on top 
 - Reset boundary: sticky confirmation resets at each block and remains false on non-DEFAULT blocks.
 - Histogram layout: 17 per predictor; 0..15 confirmed error classes, 16 unconfirmed.
 - Independent code review: approved with no P0/P1 findings; encoder/decoder synchronization, histogram bounds, Mixer slots, and block reset behavior were checked.
+- Formal decision: KEEP. EXP01B improves all 36 cases by 4 bytes and the 12 target cases by 8 bytes relative to EXP01A.
 
 ## Errors Encountered
 - A read-only `rg` check passed Windows wildcard paths as literal path names and returned an invalid-path error. Re-running with directory plus `--glob` is the correct form; source files were unaffected.
 - A read-only PowerShell summary attempted to pipe directly from a nested `foreach` expression and failed parsing. Collecting the loop output in an array before formatting fixed the command; artifacts were unaffected.
 
 ## Status
-**Implementation complete** - ready to commit and hand off for the formal 36-case benchmark.
+**Complete** - 36/36 formal cases and the independent validator passed; EXP01B is the current best branch and its create-only software candidate is validated.

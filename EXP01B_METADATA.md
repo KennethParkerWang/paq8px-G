@@ -31,10 +31,17 @@ Silesia 每个文件的前 32、64、128 KiB，不测试完整文件。每个 ca
 
 ## 构建与运行信息
 
-- Source revision：等待本次 commit。
+- Source revision：`6a37049430baf23d7a284bad5fdcb7b96f457a78`
 - Release codec：`F:\paq8px\paq-default-research-20260820\builds\EXP01B\paq8px.exe`
 - Release codec SHA-256：`666C2CA9EDF43AF88A0124F7FC3A1F58786FF82BF4ACD142F4E98AA2D1476988`
 - Assertion-enabled Debug codec：`F:\paq8px\paq-default-research-20260820\builds\EXP01B_DEBUG\paq8px.exe`
 - Debug codec SHA-256：`6B1BE1BFAE7450CC4E1357AE3BCB49BEA1A41461FCE335A48728E361321C9E3B`
 - Smoke：`sao`、`x-ray`、`osdb`、`xml` 的前 32 KiB；Release 与 Debug 均通过 4/4 byte-exact roundtrip，且对应 archives 完全一致。
-- 正式 36-case run：待运行。
+- 正式 36-case run：`F:\paq8px\paq-default-research-20260820\runs\EXP01B-record-reliability-auto-r1-20260820T032242`
+
+## 结果与结论
+
+- 36/36 cases 通过独立 validator，包括 byte-exact SHA-256 roundtrip 与 Peak RAM 证据复核。
+- 相对 EXP01A：全部 36 cases `-4 B`，target 12 cases `-8 B`；4 win、26 tie、6 loss。
+- 相对原始 v216：全部 36 cases `-205 B`，target 12 cases `-174 B`。
+- 结论：`KEEP / CURRENT_BEST`。收益只有 4 B，同时 ResidualMap 存储增加 1,536 B，后续报告必须保留这一代价说明。

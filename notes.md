@@ -29,3 +29,25 @@
 - Confirmed deterministic encoder/decoder state, histogram IDs `0..16`, exactly three `set()` or `skip()` calls per byte, and the unchanged six-input Mixer contract.
 - Confirmed block-first-byte acceptance is retained and sticky confirmation does not leak across blocks.
 - Remaining non-blocking gap: no dedicated synthetic `DEFAULT -> non-DEFAULT -> DEFAULT` input; the formal Silesia run and existing `DEFAULT -> TEXT` smoke provide the current coverage.
+
+## Formal Benchmark
+- Source revision: `6a37049430baf23d7a284bad5fdcb7b96f457a78`.
+- Run: `F:\paq8px\paq-default-research-20260820\runs\EXP01B-record-reliability-auto-r1-20260820T032242`.
+- Contract: Silesia 12 files x first 32/64/128 KiB, `-8 auto`, Repeat 1; no full-file cases.
+- Independent validator: 36 rows, manifest `COMPLETE`, 36 SHA-256 byte-exact roundtrips, and 36 Peak RAM records all passed.
+- Results CSV SHA-256: `C1AC4C1F7990F05703C8D98FF59B9E40A55A465814E776A4FC175D5F7D842DA6`.
+- Manifest SHA-256: `028873064B434E1A6CD87532FB60B4A3E30ACC4B564AE143E1C03DDABAAC5CD6`.
+- Prefix postcheck: exactly 36 rows; scopes are only 32/64/128 KiB; every input length equals `scope_kib * 1024`; no Full row exists.
+
+## Decision
+- Versus EXP01A: all cases `611,913 -> 611,909` bytes (`-4`, `-0.000654%`); target cases `324,044 -> 324,036` bytes (`-8`, `-0.002469%`).
+- Versus EXP00: all cases `612,114 -> 611,909` bytes (`-205`, `-0.033490%`); target cases `324,210 -> 324,036` bytes (`-174`, `-0.053669%`).
+- Versus EXP01A outcome count: 4 wins, 26 ties, and 6 losses.
+- Scope deltas versus EXP01A: 32 KiB `+1`, 64 KiB `-1`, 128 KiB `-4`.
+- KEEP because both the primary target sum and all-file safety sum improve deterministically. The marginal gain is only 4 bytes and costs 1,536 bytes of additional ResidualMap storage, so the tradeoff must remain explicit.
+
+## Experiment Ledger Candidate
+- Candidate: `F:\paq8px\paq-default-research-20260820\research\ledger-candidates\workspace-with-EXP01A-and-EXP01B-record-reliability-20260820T033911.json`.
+- Candidate SHA-256: `69A92C28149609A3184BDBE7F698F93980893D43400E829E578E23D2768469FE`.
+- Strict importer result: schema 2, 3 experiments, new EXP01B has 36 rows, 3 tables, 36 PASS, and no Full rows.
+- The live workspace and running Experiment Ledger process were not changed.
