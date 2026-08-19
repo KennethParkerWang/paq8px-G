@@ -3,7 +3,7 @@
 RecordResidualModel::RecordResidualModel(const Shared* const sh, const RecordModel* const record) :
     shared(sh),
     recordModel(record),
-    residualMap(sh, RecordModel::NUMERIC_PREDICTORS, 16, 64) {
+    residualMap(sh, RecordModel::NUMERIC_PREDICTORS, UNCONFIRMED_HISTOGRAM + 1, 64) {
 }
 
 void RecordResidualModel::resetReliability() {
@@ -11,6 +11,7 @@ void RecordResidualModel::resetReliability() {
     error = 0;
   }
   previousPredictionIsValid = false;
+  recordLengthConfirmed = false;
 }
 
 void RecordResidualModel::mix(Mixer& m) {
@@ -24,6 +25,7 @@ void RecordResidualModel::mix(Mixer& m) {
     }
 
     if (blockType == BlockType::DEFAULT) {
+      recordLengthConfirmed |= recordModel->wasRecordLengthAcceptedThisByte();
       if (previousPredictionIsValid) {
         INJECT_SHARED_c1
         for (int i = 0; i < RecordModel::NUMERIC_PREDICTORS; ++i) {
@@ -34,15 +36,17 @@ void RecordResidualModel::mix(Mixer& m) {
 
       recordModel->getNumericPredictions(predictions);
       for (int i = 0; i < RecordModel::NUMERIC_PREDICTORS; ++i) {
+        const int errorClass = min(static_cast<int>(predictionErrors[i] >> ERROR_SHIFT), ERROR_HISTOGRAMS - 1);
         residualMap.set(
           predictions[i],
-          min(static_cast<int>(predictionErrors[i] >> ERROR_SHIFT), 15)
+          recordLengthConfirmed ? errorClass : UNCONFIRMED_HISTOGRAM
         );
       }
       previousPredictionIsValid = true;
     }
     else {
       previousPredictionIsValid = false;
+      recordLengthConfirmed = false;
       for (int i = 0; i < RecordModel::NUMERIC_PREDICTORS; ++i) {
         residualMap.skip();
       }

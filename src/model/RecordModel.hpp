@@ -36,6 +36,7 @@ private:
   uint32_t prevTransition = 0, nTransition = 0; // position of the last padding transition
   uint32_t col = 0, mxCtx = 0, x = 0;
   bool mayBeImg24B = false;
+  bool recordLengthAcceptedThisByte = false;
 
 public:
   static constexpr int NUMERIC_PREDICTORS = 3;
@@ -49,5 +50,6 @@ public:
   RecordModel(Shared* const sh, uint64_t size);
   void setParam(uint32_t fixedRecordLenght);
   void getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]) const;
+  bool wasRecordLengthAcceptedThisByte() const { return recordLengthAcceptedThisByte; }
   void mix(Mixer &m);
 };

@@ -40,6 +40,7 @@ void RecordModel::mix(Mixer &m) {
     INJECT_SHARED_buf
     INJECT_SHARED_c4
     INJECT_SHARED_pos
+    recordLengthAcceptedThisByte = false;
     uint32_t w = c4 & 0xffff;
     uint32_t c = w & 0xff;
     uint32_t d = w >> 8;
@@ -83,11 +84,13 @@ void RecordModel::mix(Mixer &m) {
               }
             }
             rLength[0] = rLength[i + 1];
+            recordLengthAcceptedThisByte = true;
             //printf("\nRecordModel: detected record length: %d\n",rLength[0]); // for debugging
             rCount[i] = 0;
             mayBeImg24B = (rLength[0] > 30 && (rLength[0] % 3) == 0);
             nTransition = 0;
           } else {
+            recordLengthAcceptedThisByte = true;
             // we found the same length again, that's positive reinforcement that
             // this really is the correct record size, so give it a little boost
             rCount[i] >>= 2;
