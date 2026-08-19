@@ -68,7 +68,7 @@ public:
     ChartModel& chartModel = models->chartModel();
     chartModel.mix(*m);
     RecordModel& recordModel = models->recordModel();
-    recordModel.mix(*m);
+    recordModel.mix(*m, false);
     CharGroupModel& charGroupModel = models->charGroupModel();
     charGroupModel.mix(*m);
     TextModel& textModel = models->textModel();

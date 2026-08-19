@@ -2,6 +2,7 @@
 
 #include "../Shared.hpp"
 #include "../ContextMap.hpp"
+#include "../DummyMixer.hpp"
 #include "../IndirectContext.hpp"
 #include "../IndirectMap.hpp"
 #include "../RingBuffer.hpp"
@@ -19,12 +20,15 @@ private:
   static constexpr int nSSM = 4;
   static constexpr int nIM = 3;
   static constexpr int nIndContexts = 5;
+  static constexpr int nNumericMixerInputs =
+    3 * StationaryMap::MIXERINPUTS + nIM * IndirectMap::MIXERINPUTS;
   Shared * const shared;
   ContextMap cm, cn, co;
   ContextMap cp;
   StationaryMap maps[nSM];
   SmallStationaryContextMap sMap[nSSM];
   IndirectMap iMap[nIM];
+  DummyMixer numericMapsDummyMixer;
   IndirectContext<uint16_t> iCtx[nIndContexts];
   Array<uint32_t> cPos1 {256}, cPos2 {256}, cPos3 {256}, cPos4 {256};
   Array<uint32_t> wPos1 {256 * 256}; // buf(1..2) -> last position
@@ -47,5 +51,5 @@ public:
   static constexpr int MIXERCONTEXTSETS = 3;
   RecordModel(Shared* const sh, uint64_t size);
   void setParam(uint32_t fixedRecordLenght);
-  void mix(Mixer &m);
+  void mix(Mixer &m, bool numericEvidenceEnabled = true);
 };

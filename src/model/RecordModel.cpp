@@ -14,6 +14,7 @@ RecordModel::RecordModel(Shared* const sh, const uint64_t size) : shared(sh),
     iMap{ /* IndirectMap :  BitsOfContext, InputBits, Scale, Limit */
       {sh,8,8,86,255}, {sh,8,8,86,255}, {sh,8,8,86,255}
     },
+    numericMapsDummyMixer(sh, nNumericMixerInputs, 1, 1),
     iCtx{ // IndirectContext :  BitsPerContext, InputBits
       {16,8}, {16,8}, {16,8}, {20,8}, {11,1}
     }
@@ -23,7 +24,7 @@ void RecordModel::setParam(uint32_t fixedRecordLenght) {
   this->fixedRecordLength = fixedRecordLenght;
 }
 
-void RecordModel::mix(Mixer &m) {
+void RecordModel::mix(Mixer &m, const bool numericEvidenceEnabled) {
 
   INJECT_SHARED_blockType
   bool isText = isTEXT(blockType);
@@ -240,12 +241,19 @@ void RecordModel::mix(Mixer &m) {
   if (!isText) {
     maps[0].mix(m);
     maps[1].mix(m);
-    maps[2].mix(m);
-    maps[3].mix(m);
-    maps[4].mix(m);
-    iMap[0].mix(m);
-    iMap[1].mix(m);
-    iMap[2].mix(m);
+    Mixer& numericMixer = numericEvidenceEnabled ? m : numericMapsDummyMixer;
+    maps[2].mix(numericMixer);
+    maps[3].mix(numericMixer);
+    maps[4].mix(numericMixer);
+    iMap[0].mix(numericMixer);
+    iMap[1].mix(numericMixer);
+    iMap[2].mix(numericMixer);
+    if (!numericEvidenceEnabled) {
+      numericMapsDummyMixer.p();
+      for (int i = 0; i < nNumericMixerInputs; ++i) {
+        m.add(0);
+      }
+    }
     sMap[3].mix(m);
   }
   
