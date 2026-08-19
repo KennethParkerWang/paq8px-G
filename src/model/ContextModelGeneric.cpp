@@ -71,7 +71,7 @@ public:
     ChartModel& chartModel = models->chartModel();
     chartModel.mix(*m);
     RecordModel& recordModel = models->recordModel();
-    recordModel.mix(*m);
+    recordModel.mix(*m, RecordModel::NEUTRALIZE_MAP4);
     recordResidualModel.mix(*m);
     CharGroupModel& charGroupModel = models->charGroupModel();
     charGroupModel.mix(*m);
