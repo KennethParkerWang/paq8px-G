@@ -2,6 +2,7 @@
 
 #include "../Shared.hpp"
 #include "../ContextMap.hpp"
+#include "../DummyMixer.hpp"
 #include "../IndirectContext.hpp"
 #include "../IndirectMap.hpp"
 #include "../RingBuffer.hpp"
@@ -19,12 +20,15 @@ private:
   static constexpr int nSSM = 4;
   static constexpr int nIM = 3;
   static constexpr int nIndContexts = 5;
+  static constexpr int nLegacyNumericMixerInputs =
+    3 * StationaryMap::MIXERINPUTS + nIM * IndirectMap::MIXERINPUTS;
   Shared * const shared;
   ContextMap cm, cn, co;
   ContextMap cp;
   StationaryMap maps[nSM];
   SmallStationaryContextMap sMap[nSSM];
   IndirectMap iMap[nIM];
+  DummyMixer legacyNumericMapsDummyMixer;
   IndirectContext<uint16_t> iCtx[nIndContexts];
   Array<uint32_t> cPos1 {256}, cPos2 {256}, cPos3 {256}, cPos4 {256};
   Array<uint32_t> wPos1 {256 * 256}; // buf(1..2) -> last position
@@ -40,6 +44,13 @@ private:
 
 public:
   static constexpr int NUMERIC_PREDICTORS = 3;
+  static constexpr uint8_t NEUTRALIZE_MAP2 = 1U << 0;
+  static constexpr uint8_t NEUTRALIZE_MAP3 = 1U << 1;
+  static constexpr uint8_t NEUTRALIZE_MAP4 = 1U << 2;
+  static constexpr uint8_t NEUTRALIZE_IMAP0 = 1U << 3;
+  static constexpr uint8_t NEUTRALIZE_IMAP1 = 1U << 4;
+  static constexpr uint8_t NEUTRALIZE_IMAP2 = 1U << 5;
+  static constexpr uint8_t NEUTRALIZE_LEGACY_NUMERIC_MASK = (1U << 6) - 1;
   static constexpr int MIXERINPUTS =
     nCM * ContextMap::MIXERINPUTS +
     nSM * StationaryMap::MIXERINPUTS + 
@@ -51,5 +62,5 @@ public:
   void setParam(uint32_t fixedRecordLenght);
   void getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]) const;
   bool wasRecordLengthAcceptedThisByte() const { return recordLengthAcceptedThisByte; }
-  void mix(Mixer &m);
+  void mix(Mixer &m, uint8_t neutralizeLegacyNumericMask = 0);
 };
