@@ -34,6 +34,9 @@ void RecordModel::mix(Mixer &m) {
     INJECT_SHARED_buf
     INJECT_SHARED_c4
     INJECT_SHARED_pos
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+    bool diagnosticDetectedRecordLength = false;
+#endif
     uint32_t w = c4 & 0xffff;
     uint32_t c = w & 0xff;
     uint32_t d = w >> 8;
@@ -56,6 +59,19 @@ void RecordModel::mix(Mixer &m) {
         }
       }
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+      if (blockType == BlockType::DEFAULT) {
+        auto &diag = shared->researchDiagnostics.record;
+        for (int i = 0; i < 2; i++) {
+          if (diag.candidateLength[i] != rLength[i + 1]) {
+            diag.candidateLength[i] = rLength[i + 1];
+            diag.candidateMaxCount[i] = 0;
+          }
+          diag.candidateMaxCount[i] = max(diag.candidateMaxCount[i], rCount[i]);
+        }
+      }
+#endif
+
       // check candidate lengths
       for( int i = 0; i < 2; i++ ) {
         if( static_cast<int>(rCount[i]) > max(0, 12 - static_cast<int>(ilog2(rLength[i + 1])))) {
@@ -76,12 +92,18 @@ void RecordModel::mix(Mixer &m) {
                 continue;
               }
             }
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+            diagnosticDetectedRecordLength = blockType == BlockType::DEFAULT;
+#endif
             rLength[0] = rLength[i + 1];
             //printf("\nRecordModel: detected record length: %d\n",rLength[0]); // for debugging
             rCount[i] = 0;
             mayBeImg24B = (rLength[0] > 30 && (rLength[0] % 3) == 0);
             nTransition = 0;
           } else {
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+            diagnosticDetectedRecordLength = blockType == BlockType::DEFAULT;
+#endif
             // we found the same length again, that's positive reinforcement that
             // this really is the correct record size, so give it a little boost
             rCount[i] >>= 2;
@@ -107,6 +129,65 @@ void RecordModel::mix(Mixer &m) {
     NN = buf(rLength[0] * 2);
     NNN = buf(rLength[0] * 3);
     NNNN = buf(rLength[0] * 4);
+
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+    if (blockType == BlockType::DEFAULT) {
+      auto &diag = shared->researchDiagnostics.record;
+      const bool contiguous = diag.hasLastSample != 0 && diag.lastSamplePosition + 1 == pos;
+      if (!contiguous) {
+        ++diag.defaultSegments;
+        diag.pendingValid = 0;
+        diag.lastRecordLength = 0;
+        diag.stableDuration = 0;
+        diag.exactRecordLength = 0;
+      }
+
+      ++diag.samples;
+      diag.hasLastSample = 1;
+      diag.lastSamplePosition = pos;
+      diag.recordLength = rLength[0];
+
+      if (diag.lastRecordLength == 0) {
+        diag.stableDuration = 1;
+      }
+      else if (diag.lastRecordLength != rLength[0]) {
+        ++diag.recordLengthChanges;
+        diag.stableDuration = 1;
+      }
+      else {
+        ++diag.stableDuration;
+      }
+      diag.lastRecordLength = rLength[0];
+      diag.maxStableDuration = max(diag.maxStableDuration, diag.stableDuration);
+
+      for (int i = 0; i < 2; i++) {
+        if (diag.candidateLength[i] != rLength[i + 1]) {
+          diag.candidateLength[i] = rLength[i + 1];
+          diag.candidateMaxCount[i] = 0;
+        }
+        diag.candidateCount[i] = rCount[i];
+        diag.candidateMaxCount[i] = max(diag.candidateMaxCount[i], rCount[i]);
+      }
+
+      if (diag.pendingValid != 0) {
+        for (int i = 0; i < 3; i++) {
+          const uint32_t err = static_cast<uint32_t>(rabs(c, diag.pendingPrediction[i]));
+          diag.residualEwma[i] = ((diag.residualEwma[i] * 15) >> 4) + err;
+        }
+        ++diag.residualSamples;
+      }
+
+      if (diagnosticDetectedRecordLength) {
+        diag.exactRecordLength = rLength[0];
+      }
+
+      diag.pendingPrediction[0] = N + NN - NNN;
+      diag.pendingPrediction[1] = N * 2 - NN;
+      diag.pendingPrediction[2] = N * 3 - NN * 3 + NNN;
+      diag.pendingValid = 1;
+    }
+#endif
+
     for( int i = 0; i < nIndContexts - 1; iCtx[i] += c, i++ ) { ;
     }
     iCtx[0] = (c << 8) | N;

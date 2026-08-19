@@ -93,12 +93,80 @@ void SimilarityModelPair::update() {
 
 }
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+void SimilarityModelPair::captureResearchDiagnostics() const {
+  if (shared->State.blockType != BlockType::DEFAULT) {
+    return;
+  }
+
+  const uint64_t pos = shared->buf.getpos();
+  auto sampleSimilarity = [pos](Shared::SimilarityResearchDiagnostics &diag, const SimilarityModel &model) {
+    const bool contiguous = diag.hasLastSample != 0 && diag.lastSamplePosition + 1 == pos;
+    if (!contiguous) {
+      diag.lastRecordLength = 0;
+      diag.stableDuration = 0;
+    }
+
+    ++diag.samples;
+    diag.hasLastSample = 1;
+    diag.lastSamplePosition = pos;
+    diag.recordLength = model.getRecordLength();
+    diag.recordScore = model.getRecordScore();
+    for (int i = 0; i < 2; i++) {
+      diag.matchPeriod[i] = model.getMatchPeriod(i);
+      diag.matchScore[i] = model.getMatchScore(i);
+    }
+
+    if (diag.lastRecordLength == 0) {
+      diag.stableDuration = 1;
+    }
+    else if (diag.lastRecordLength != diag.recordLength) {
+      ++diag.recordLengthChanges;
+      diag.stableDuration = 1;
+    }
+    else {
+      ++diag.stableDuration;
+    }
+    diag.lastRecordLength = diag.recordLength;
+    diag.maxStableDuration = max(diag.maxStableDuration, diag.stableDuration);
+  };
+
+  auto sampleCross = [](Shared::CrossResearchDiagnostics &diag, const uint32_t exactLength, const uint32_t similarityLength) {
+    if (exactLength == 0) {
+      ++diag.noExact;
+    }
+    else if (exactLength == similarityLength) {
+      ++diag.equal;
+    }
+    else if (static_cast<uint64_t>(exactLength) == static_cast<uint64_t>(similarityLength) * 2 ||
+             static_cast<uint64_t>(similarityLength) == static_cast<uint64_t>(exactLength) * 2) {
+      ++diag.multiple2x;
+    }
+    else {
+      ++diag.disagree;
+    }
+  };
+
+  auto &diag = shared->researchDiagnostics;
+  sampleSimilarity(diag.similaritySlow, *similarityModel_slow);
+  sampleSimilarity(diag.similarityFast, *similarityModel_fast);
+
+  const uint32_t exactLength =
+    diag.record.hasLastSample != 0 && diag.record.lastSamplePosition == pos ? diag.record.exactRecordLength : 0;
+  sampleCross(diag.crossSlow, exactLength, diag.similaritySlow.recordLength);
+  sampleCross(diag.crossFast, exactLength, diag.similarityFast.recordLength);
+}
+#endif
+
 void SimilarityModelPair::mix(Mixer& m) {
   INJECT_SHARED_bpos
   if (bpos == 0) {
     update();
     similarityModel_slow->update(warmup);
     similarityModel_fast->update(warmup);
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+    captureResearchDiagnostics();
+#endif
   }
   similarityModel_slow->mix(m);
   similarityModel_fast->mix(m);

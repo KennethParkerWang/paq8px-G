@@ -41,6 +41,60 @@ private:
 
 public:
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+  struct RecordResearchDiagnostics {
+    uint64_t samples;
+    uint64_t defaultSegments;
+    uint64_t recordLengthChanges;
+    uint64_t stableDuration;
+    uint64_t maxStableDuration;
+    uint64_t residualSamples;
+    uint64_t lastSamplePosition;
+    uint32_t recordLength;
+    uint32_t exactRecordLength;
+    uint32_t candidateLength[2];
+    uint32_t candidateCount[2];
+    uint32_t candidateMaxCount[2];
+    int32_t pendingPrediction[3];
+    uint32_t residualEwma[3];
+    uint32_t lastRecordLength;
+    uint8_t pendingValid;
+    uint8_t hasLastSample;
+  };
+
+  struct SimilarityResearchDiagnostics {
+    uint64_t samples;
+    uint64_t recordLengthChanges;
+    uint64_t stableDuration;
+    uint64_t maxStableDuration;
+    uint64_t lastSamplePosition;
+    uint32_t recordLength;
+    uint32_t recordScore;
+    uint32_t matchPeriod[2];
+    uint32_t matchScore[2];
+    uint32_t lastRecordLength;
+    uint8_t hasLastSample;
+  };
+
+  struct CrossResearchDiagnostics {
+    uint64_t equal;
+    uint64_t multiple2x;
+    uint64_t disagree;
+    uint64_t noExact;
+  };
+
+  struct ResearchDiagnostics {
+    RecordResearchDiagnostics record;
+    SimilarityResearchDiagnostics similaritySlow;
+    SimilarityResearchDiagnostics similarityFast;
+    CrossResearchDiagnostics crossSlow;
+    CrossResearchDiagnostics crossFast;
+  };
+
+  ResearchDiagnostics researchDiagnostics{};
+  void printResearchDiagnostics() const;
+#endif
+
   //Shared state and statistics (global)
 
   RingBuffer<uint8_t> buf; /**< Rotating input queue set by Predictor */

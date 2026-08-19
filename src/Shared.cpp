@@ -1,6 +1,15 @@
 ﻿#include "Shared.hpp"
 #include "ArithmeticEncoder.hpp"
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+#include <cinttypes>
+#include <cstdio>
+#include <type_traits>
+
+static_assert(std::is_trivial<Shared::ResearchDiagnostics>::value, "Research diagnostics must remain POD");
+static_assert(std::is_standard_layout<Shared::ResearchDiagnostics>::value, "Research diagnostics must remain POD");
+#endif
+
 /*
  relationship between compression level, shared->mem and buf memory use
 
@@ -65,12 +74,70 @@ void Shared::reset() {
   buf.reset();
   memset(&State, 0, sizeof(State));
   State.c0 = 1;
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+  researchDiagnostics = {};
+#endif
 }
 
 UpdateBroadcaster *Shared::GetUpdateBroadcaster() const {
   UpdateBroadcaster* updater = const_cast<UpdateBroadcaster*>(&updateBroadcaster);
   return updater;
 }
+
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+void Shared::printResearchDiagnostics() const {
+  const auto &d = researchDiagnostics;
+  const auto &r = d.record;
+  const auto &slow = d.similaritySlow;
+  const auto &fast = d.similarityFast;
+  const auto &crossSlow = d.crossSlow;
+  const auto &crossFast = d.crossFast;
+
+  printf(
+    "@@PAQDIAG_V1@@{"
+    "\"record\":{"
+      "\"samples\":%" PRIu64 ",\"defaultSegments\":%" PRIu64 ","
+      "\"rLength\":%u,\"exactLength\":%u,\"autoDetected\":%u,\"changes\":%" PRIu64 ","
+      "\"stable\":%" PRIu64 ",\"maxStable\":%" PRIu64 ","
+      "\"candidates\":["
+        "{\"length\":%u,\"count\":%u,\"maxCount\":%u},"
+        "{\"length\":%u,\"count\":%u,\"maxCount\":%u}],"
+      "\"residualSamples\":%" PRIu64 ",\"pendingValid\":%u,"
+      "\"predictors\":["
+        "{\"pending\":%d,\"ewma\":%u},"
+        "{\"pending\":%d,\"ewma\":%u},"
+        "{\"pending\":%d,\"ewma\":%u}]},"
+    "\"similarity\":{"
+      "\"slow\":{\"samples\":%" PRIu64 ",\"recordLength\":%u,\"recordScore\":%u,"
+        "\"recordLengthChanges\":%" PRIu64 ",\"stable\":%" PRIu64 ",\"maxStable\":%" PRIu64 ","
+        "\"matchPeriods\":[%u,%u],\"matchScores\":[%u,%u]},"
+      "\"fast\":{\"samples\":%" PRIu64 ",\"recordLength\":%u,\"recordScore\":%u,"
+        "\"recordLengthChanges\":%" PRIu64 ",\"stable\":%" PRIu64 ",\"maxStable\":%" PRIu64 ","
+        "\"matchPeriods\":[%u,%u],\"matchScores\":[%u,%u]}},"
+    "\"cross\":{"
+      "\"slow\":{\"equal\":%" PRIu64 ",\"multiple2x\":%" PRIu64 ",\"disagree\":%" PRIu64 ",\"noExact\":%" PRIu64 "},"
+      "\"fast\":{\"equal\":%" PRIu64 ",\"multiple2x\":%" PRIu64 ",\"disagree\":%" PRIu64 ",\"noExact\":%" PRIu64 "}}}"
+    "\n",
+    r.samples, r.defaultSegments,
+    r.recordLength, r.exactRecordLength, static_cast<unsigned>(r.exactRecordLength != 0), r.recordLengthChanges,
+    r.stableDuration, r.maxStableDuration,
+    r.candidateLength[0], r.candidateCount[0], r.candidateMaxCount[0],
+    r.candidateLength[1], r.candidateCount[1], r.candidateMaxCount[1],
+    r.residualSamples, static_cast<unsigned>(r.pendingValid),
+    r.pendingPrediction[0], r.residualEwma[0],
+    r.pendingPrediction[1], r.residualEwma[1],
+    r.pendingPrediction[2], r.residualEwma[2],
+    slow.samples, slow.recordLength, slow.recordScore,
+    slow.recordLengthChanges, slow.stableDuration, slow.maxStableDuration,
+    slow.matchPeriod[0], slow.matchPeriod[1], slow.matchScore[0], slow.matchScore[1],
+    fast.samples, fast.recordLength, fast.recordScore,
+    fast.recordLengthChanges, fast.stableDuration, fast.maxStableDuration,
+    fast.matchPeriod[0], fast.matchPeriod[1], fast.matchScore[0], fast.matchScore[1],
+    crossSlow.equal, crossSlow.multiple2x, crossSlow.disagree, crossSlow.noExact,
+    crossFast.equal, crossFast.multiple2x, crossFast.disagree, crossFast.noExact
+  );
+}
+#endif
 
 bool Shared::isOutputRedirected() {
 #ifdef WINDOWS

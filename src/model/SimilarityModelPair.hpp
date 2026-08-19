@@ -28,6 +28,10 @@ class SimilarityModelPair
   uint32_t EMA_ALPHA_FAST;                               // for the fast model (typical: 5-9), fixed-point with denominator of 64
   size_t warmup = 0;                                     // bytes processed so far; caps EMA loop range
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+  void captureResearchDiagnostics() const;
+#endif
+
   // Maximum match/record search distance (in bytes) indexed by compression level (1–12).
   // values must be multiples of 16 (AVX2 stride)
   static constexpr uint32_t MAX_MATCH_DISTANCE_TABLE[12] = {

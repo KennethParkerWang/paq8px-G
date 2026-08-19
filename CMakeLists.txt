@@ -9,6 +9,7 @@ option(NATIVECPU "Whether to build for your CPU (vs. general public)" OFF)
 option(DISABLE_ZLIB "Disable zlib re-compression support" OFF)
 option(NDEBUG "Suppress asserts and array bound checks" ON)
 option(ENABLE_WARNINGS "Enable compiler warnings ('diag' mode)" OFF)
+option(PAQ_RESEARCH_DIAGNOSTICS "Emit deterministic PAQ research diagnostics" OFF)
 
 # --------------------------------------
 # Compiler settings
@@ -129,6 +130,10 @@ endforeach()
 # --------------------------------------
 add_executable(paq8px ${PAQ_SOURCES})
 
+if (PAQ_RESEARCH_DIAGNOSTICS)
+    target_compile_definitions(paq8px PRIVATE PAQ_RESEARCH_DIAGNOSTICS)
+endif()
+
 # Disable RTTI
 target_compile_options(paq8px PRIVATE -fno-rtti)
 
@@ -176,5 +181,6 @@ message(STATUS "  NATIVECPU: ${NATIVECPU}")
 message(STATUS "  DISABLE_ZLIB: ${DISABLE_ZLIB}")
 message(STATUS "  NDEBUG: ${NDEBUG}")
 message(STATUS "  ENABLE_WARNINGS: ${ENABLE_WARNINGS}")
+message(STATUS "  PAQ_RESEARCH_DIAGNOSTICS: ${PAQ_RESEARCH_DIAGNOSTICS}")
 message(STATUS "  Architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")

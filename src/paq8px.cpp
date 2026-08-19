@@ -1174,6 +1174,12 @@ int processCommandLine(int argc, char **argv) {
     if( whattodo != DoList ) {
       programChecker->print();
     }
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+    if (!shared.GetOptionMultipleFileMode() &&
+        (whattodo == DoCompress || whattodo == DoExtract || whattodo == DoCompare)) {
+      shared.printResearchDiagnostics();
+    }
+#endif
   }
     // we catch only the intentional exceptions from quit() to exit gracefully
     // any other exception should result in a crash and must be investigated

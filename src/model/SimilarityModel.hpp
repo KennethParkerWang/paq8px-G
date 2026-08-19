@@ -50,6 +50,13 @@ public:
   void update(uint32_t warmup);
   void mix(Mixer& m);
 
+#ifdef PAQ_RESEARCH_DIAGNOSTICS
+  uint32_t getRecordLength() const { return record_len; }
+  uint32_t getRecordScore() const { return record_score; }
+  uint32_t getMatchPeriod(const int i) const { return static_cast<uint32_t>(MAX_MATCH_DISTANCE - match_index[i]); }
+  uint32_t getMatchScore(const int i) const { return match_score[i]; }
+#endif
+
   // exposed public members for SimilarityModelPair
 
   const size_t MAX_MATCH_DISTANCE; // typically 8192
