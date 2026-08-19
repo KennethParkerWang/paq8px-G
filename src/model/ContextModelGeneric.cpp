@@ -1,21 +1,24 @@
 ﻿#include "../MixerFactory.hpp"
 #include "../Models.hpp"
+#include "RecordResidualModel.hpp"
 
 class ContextModelGeneric: public IContextModel {
 
 private:
   Shared* const shared;
   Models* const models;
+  RecordResidualModel recordResidualModel;
   Mixer* m;
 
 public:
-  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) : shared(sh), models(models) {
+  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) :
+      shared(sh), models(models), recordResidualModel(sh, &models->recordModel()) {
     const bool useLSTM = shared->GetOptionUseLSTM();
     m = mf->createMixer(
       1 +  //bias
       MatchModel::MIXERINPUTS + NormalModel::MIXERINPUTS + SparseMatchModel::MIXERINPUTS +
       SparseModel::MIXERINPUTS + SparseBitModel::MIXERINPUTS + ChartModel::MIXERINPUTS +
-      RecordModel::MIXERINPUTS + CharGroupModel::MIXERINPUTS +
+      RecordModel::MIXERINPUTS + RecordResidualModel::MIXERINPUTS + CharGroupModel::MIXERINPUTS +
       TextModel::MIXERINPUTS + WordModel::MIXERINPUTS_BIN + IndirectModel::MIXERINPUTS +
       DmcForest::MIXERINPUTS + NestModel::MIXERINPUTS + XMLModel::MIXERINPUTS +
       LinearPredictionModel::MIXERINPUTS + 2 * SimilarityModel::MIXERINPUTS + ExeModel::MIXERINPUTS +
@@ -69,6 +72,7 @@ public:
     chartModel.mix(*m);
     RecordModel& recordModel = models->recordModel();
     recordModel.mix(*m);
+    recordResidualModel.mix(*m);
     CharGroupModel& charGroupModel = models->charGroupModel();
     charGroupModel.mix(*m);
     TextModel& textModel = models->textModel();

@@ -192,6 +192,9 @@
     <ClCompile Include="model\RecordModel.cpp">
       <Filter>model</Filter>
     </ClCompile>
+    <ClCompile Include="model\RecordResidualModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
     <ClCompile Include="model\SparseMatchModel.cpp">
       <Filter>model</Filter>
     </ClCompile>
@@ -684,6 +687,9 @@
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\RecordModel.hpp">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="model\RecordResidualModel.hpp">
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\SparseMatchModel.hpp">

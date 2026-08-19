@@ -38,6 +38,7 @@ private:
   bool mayBeImg24B = false;
 
 public:
+  static constexpr int NUMERIC_PREDICTORS = 3;
   static constexpr int MIXERINPUTS =
     nCM * ContextMap::MIXERINPUTS +
     nSM * StationaryMap::MIXERINPUTS + 
@@ -47,5 +48,6 @@ public:
   static constexpr int MIXERCONTEXTSETS = 3;
   RecordModel(Shared* const sh, uint64_t size);
   void setParam(uint32_t fixedRecordLenght);
+  void getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]) const;
   void mix(Mixer &m);
 };

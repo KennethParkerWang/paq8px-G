@@ -339,6 +339,7 @@
     <ClCompile Include="model\NestModel.cpp" />
     <ClCompile Include="model\NormalModel.cpp" />
     <ClCompile Include="model\RecordModel.cpp" />
+    <ClCompile Include="model\RecordResidualModel.cpp" />
     <ClCompile Include="model\SparseBitModel.cpp" />
     <ClCompile Include="model\SparseMatchModel.cpp" />
     <ClCompile Include="model\SparseModel.cpp" />
@@ -502,6 +503,7 @@
     <ClInclude Include="model\NestModel.hpp" />
     <ClInclude Include="model\NormalModel.hpp" />
     <ClInclude Include="model\RecordModel.hpp" />
+    <ClInclude Include="model\RecordResidualModel.hpp" />
     <ClInclude Include="model\SparseBitModel.hpp" />
     <ClInclude Include="model\SparseMatchModel.hpp" />
     <ClInclude Include="model\SparseModel.hpp" />

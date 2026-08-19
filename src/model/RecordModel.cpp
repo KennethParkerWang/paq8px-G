@@ -23,6 +23,12 @@ void RecordModel::setParam(uint32_t fixedRecordLenght) {
   this->fixedRecordLength = fixedRecordLenght;
 }
 
+void RecordModel::getNumericPredictions(short (&predictions)[NUMERIC_PREDICTORS]) const {
+  predictions[0] = static_cast<short>(N + NN - NNN);
+  predictions[1] = static_cast<short>(2 * N - NN);
+  predictions[2] = static_cast<short>(3 * N - 3 * NN + NNN);
+}
+
 void RecordModel::mix(Mixer &m) {
 
   INJECT_SHARED_blockType
