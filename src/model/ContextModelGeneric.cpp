@@ -1,4 +1,5 @@
 ﻿#include "../MixerFactory.hpp"
+#include "../DummyMixer.hpp"
 #include "../Models.hpp"
 
 class ContextModelGeneric: public IContextModel {
@@ -7,9 +8,22 @@ private:
   Shared* const shared;
   Models* const models;
   Mixer* m;
+  DummyMixer similarityDummyMixer;
+
+  static void addNeutralInputs(Mixer& mixer, const int count) {
+    for (int i = 0; i < count; ++i) {
+      mixer.add(0);
+    }
+  }
 
 public:
-  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) : shared(sh), models(models) {
+  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) :
+      shared(sh),
+      models(models),
+      m(nullptr),
+      similarityDummyMixer(sh, 2 * SimilarityModel::MIXERINPUTS,
+                           2 * SimilarityModel::MIXERCONTEXTS,
+                           2 * SimilarityModel::MIXERCONTEXTSETS) {
     const bool useLSTM = shared->GetOptionUseLSTM();
     m = mf->createMixer(
       1 +  //bias
@@ -88,7 +102,13 @@ public:
     linearPredictionModel.mix(*m);
 
     SimilarityModelPair& similarityModelPair = models->similarityModelPair();
-    similarityModelPair.mix(*m);
+    similarityModelPair.mix(similarityDummyMixer);
+    similarityDummyMixer.p();
+    addNeutralInputs(*m, 2 * SimilarityModel::MIXERINPUTS);
+    m->set(0, 3 * 32);
+    m->set(0, 3 * 2);
+    m->set(0, 3 * 32);
+    m->set(0, 3 * 2);
 
     //exemodel must be the last
     ExeModel& exeModel = models->exeModel();
