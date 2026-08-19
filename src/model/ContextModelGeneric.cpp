@@ -1,4 +1,5 @@
 ﻿#include "../MixerFactory.hpp"
+#include "../DummyMixer.hpp"
 #include "../Models.hpp"
 
 class ContextModelGeneric: public IContextModel {
@@ -7,9 +8,20 @@ private:
   Shared* const shared;
   Models* const models;
   Mixer* m;
+  DummyMixer recordDummyMixer;
+
+  static void addNeutralInputs(Mixer& mixer, const int count) {
+    for (int i = 0; i < count; ++i) {
+      mixer.add(0);
+    }
+  }
 
 public:
-  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) : shared(sh), models(models) {
+  ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) :
+      shared(sh),
+      models(models),
+      m(nullptr),
+      recordDummyMixer(sh, RecordModel::MIXERINPUTS, RecordModel::MIXERCONTEXTS, RecordModel::MIXERCONTEXTSETS) {
     const bool useLSTM = shared->GetOptionUseLSTM();
     m = mf->createMixer(
       1 +  //bias
@@ -68,7 +80,12 @@ public:
     ChartModel& chartModel = models->chartModel();
     chartModel.mix(*m);
     RecordModel& recordModel = models->recordModel();
-    recordModel.mix(*m);
+    recordModel.mix(recordDummyMixer);
+    recordDummyMixer.p();
+    addNeutralInputs(*m, RecordModel::MIXERINPUTS);
+    m->set(0, 1024);
+    m->set(0, 512);
+    m->set(0, 11 * 32);
     CharGroupModel& charGroupModel = models->charGroupModel();
     charGroupModel.mix(*m);
     TextModel& textModel = models->textModel();
