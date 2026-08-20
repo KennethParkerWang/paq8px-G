@@ -1,5 +1,6 @@
 ﻿#include "../MixerFactory.hpp"
 #include "../Models.hpp"
+#include "NumericFieldModel.hpp"
 #include "RecordResidualModel.hpp"
 
 class ContextModelGeneric: public IContextModel {
@@ -8,17 +9,19 @@ private:
   Shared* const shared;
   Models* const models;
   RecordResidualModel recordResidualModel;
+  NumericFieldModel numericFieldModel;
   Mixer* m;
 
 public:
   ContextModelGeneric(Shared* const sh, Models* const models, const MixerFactory* const mf) :
-      shared(sh), models(models), recordResidualModel(sh, &models->recordModel()) {
+      shared(sh), models(models), recordResidualModel(sh, &models->recordModel()),
+      numericFieldModel(sh, &models->recordModel(), &recordResidualModel) {
     const bool useLSTM = shared->GetOptionUseLSTM();
     m = mf->createMixer(
       1 +  //bias
       MatchModel::MIXERINPUTS + NormalModel::MIXERINPUTS + SparseMatchModel::MIXERINPUTS +
       SparseModel::MIXERINPUTS + SparseBitModel::MIXERINPUTS + ChartModel::MIXERINPUTS +
-      RecordModel::MIXERINPUTS + RecordResidualModel::MIXERINPUTS + CharGroupModel::MIXERINPUTS +
+      RecordModel::MIXERINPUTS + RecordResidualModel::MIXERINPUTS + NumericFieldModel::MIXERINPUTS + CharGroupModel::MIXERINPUTS +
       TextModel::MIXERINPUTS + WordModel::MIXERINPUTS_BIN + IndirectModel::MIXERINPUTS +
       DmcForest::MIXERINPUTS + NestModel::MIXERINPUTS + XMLModel::MIXERINPUTS +
       LinearPredictionModel::MIXERINPUTS + 2 * SimilarityModel::MIXERINPUTS + ExeModel::MIXERINPUTS +
@@ -73,6 +76,7 @@ public:
     RecordModel& recordModel = models->recordModel();
     recordModel.mix(*m, RecordModel::NEUTRALIZE_IMAP1 | RecordModel::NEUTRALIZE_MAP2);
     recordResidualModel.mix(*m);
+    numericFieldModel.mix(*m);
     CharGroupModel& charGroupModel = models->charGroupModel();
     charGroupModel.mix(*m);
     TextModel& textModel = models->textModel();

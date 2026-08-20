@@ -189,6 +189,9 @@
     <ClCompile Include="model\NormalModel.cpp">
       <Filter>model</Filter>
     </ClCompile>
+    <ClCompile Include="model\NumericFieldModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
     <ClCompile Include="model\RecordModel.cpp">
       <Filter>model</Filter>
     </ClCompile>
@@ -684,6 +687,9 @@
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\NormalModel.hpp">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="model\NumericFieldModel.hpp">
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\RecordModel.hpp">
