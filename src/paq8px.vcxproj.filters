@@ -441,6 +441,9 @@
     <ClCompile Include="model\SimilarityModelPair.cpp">
       <Filter>model</Filter>
     </ClCompile>
+    <ClCompile Include="model\NumericFieldModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdaptiveMap.hpp">
@@ -684,6 +687,9 @@
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\NormalModel.hpp">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="model\NumericFieldModel.hpp">
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="model\RecordModel.hpp">
