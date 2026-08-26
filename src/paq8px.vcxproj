@@ -274,6 +274,7 @@
     <ClCompile Include="filter\LZWDictionary.cpp" />
     <ClCompile Include="filter\TextParserStateInfo.cpp" />
     <ClCompile Include="Ilog.cpp" />
+    <ClCompile Include="HierarchicalPosterior.cpp" />
     <ClCompile Include="IndirectMap.cpp" />
     <ClCompile Include="LargeStationaryMap.cpp" />
     <ClCompile Include="LMS.cpp" />
@@ -443,6 +444,7 @@
     <ClInclude Include="HashElementForContextMap.hpp" />
     <ClInclude Include="HashElementForStationaryMap.hpp" />
     <ClInclude Include="Ilog.hpp" />
+    <ClInclude Include="HierarchicalPosterior.hpp" />
     <ClInclude Include="IndirectContext.hpp" />
     <ClInclude Include="IndirectMap.hpp" />
     <ClInclude Include="IPredictor.hpp" />

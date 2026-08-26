@@ -20,3 +20,4 @@ x64/
 release/
 debug/
 packages/
+build-*/

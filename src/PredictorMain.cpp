@@ -1,7 +1,7 @@
 #include "PredictorMain.hpp"
 #include "ArithmeticEncoder.hpp"
 
-PredictorMain::PredictorMain(Shared* const sh) : Predictor(sh), sse(sh) {
+PredictorMain::PredictorMain(Shared* const sh) : Predictor(sh), sse(sh), posterior(sh) {
   mixerFactory = new MixerFactory(shared);
   models = new Models(sh, mixerFactory);
   models->trainModelsWhenNeeded();
@@ -17,5 +17,5 @@ PredictorMain::~PredictorMain() {
 uint32_t PredictorMain::p() {
   uint32_t pr = contextModel->p();
   pr = sse.p(pr);
-  return pr;
+  return posterior.predict(pr);
 }

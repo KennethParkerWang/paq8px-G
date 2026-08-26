@@ -60,6 +60,9 @@
     <ClCompile Include="Ilog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HierarchicalPosterior.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="IndirectMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -480,6 +483,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Ilog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchicalPosterior.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IndirectContext.hpp">

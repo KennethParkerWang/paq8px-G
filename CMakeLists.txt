@@ -9,6 +9,7 @@ option(NATIVECPU "Whether to build for your CPU (vs. general public)" OFF)
 option(DISABLE_ZLIB "Disable zlib re-compression support" OFF)
 option(NDEBUG "Suppress asserts and array bound checks" ON)
 option(ENABLE_WARNINGS "Enable compiler warnings ('diag' mode)" OFF)
+set(HDPP_MODE "1" CACHE STRING "Rank 1 posterior mode: 0=off, 1=statistical, 2=recurrent, 3=dual")
 
 # --------------------------------------
 # Compiler settings
@@ -49,6 +50,7 @@ else()
 endif()
 
 add_compile_options(${BASE_FLAGS})
+add_compile_definitions(HDPP_MODE=${HDPP_MODE})
 
 # Warning flags
 if (ENABLE_WARNINGS)
@@ -176,5 +178,6 @@ message(STATUS "  NATIVECPU: ${NATIVECPU}")
 message(STATUS "  DISABLE_ZLIB: ${DISABLE_ZLIB}")
 message(STATUS "  NDEBUG: ${NDEBUG}")
 message(STATUS "  ENABLE_WARNINGS: ${ENABLE_WARNINGS}")
+message(STATUS "  HDPP_MODE: ${HDPP_MODE}")
 message(STATUS "  Architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")

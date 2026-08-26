@@ -5,6 +5,7 @@
 #include "Shared.hpp"
 #include "Predictor.hpp"
 #include "model/ContextModel.hpp"
+#include "HierarchicalPosterior.hpp"
 
 /**
  * A Predictor which estimates the probability that the next bit of uncompressed data is 1 
@@ -16,6 +17,7 @@ private:
   MixerFactory* mixerFactory;
   ContextModel* contextModel;
   SSE sse;
+  HierarchicalPosterior posterior;
 public:
   PredictorMain(Shared* const sh);
   ~PredictorMain();
