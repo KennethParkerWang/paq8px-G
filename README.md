@@ -265,6 +265,25 @@ experiment/rank1-hdp
 
 `ABL_*` 分支用于检查 Record、Linear、Similarity 等已有模型的边际价值。完整逐 case 数据和实验日志保存在 `paq-default-research-20260820/runs-prefix-level1/`，README 只摘录可复核的汇总。
 
+## 研究节点：大改前快照（2026-08-27）
+
+这是后续大规模重构前的可回溯节点，旧实现、实验结果和结论不应被覆盖：
+
+- 节点名/tag：`checkpoint/pre-major-refactor-20260827`。
+- 基准分支：`experiment/rank1-hdp`。
+- README 更新前的代码提交：`8104a91`（HDPP 当前研究版）。本节点 tag 指向本次 README 更新后的提交。
+- 默认成果口径固定为：PAQ8px v216、`-1`、12 个 Silesia 文件的前 `32/64/128 KiB`，共 36 cases，Repeat=1，并通过 encode/decode/SHA-256 校验。
+- 当前前缀测试最佳结果：Rank 1 HDPP 为 `646,628 B`，比 Original v216 `-1` 少 `706 B`（`-0.1091%`）；EXP03B Numeric16 Conditional 是主要收益来源，HDPP 额外减少 `7 B`。
+- 完整文件只把 `sao` 记为严格成对 PASS：`3,769,793 B → 3,767,793 B`，减少 `2,000 B`。其它完整文件没有形成同一协议下的完整成对 PASS，不能外推为完整 Silesia 总体提升。
+- 后续阶段可以修改模型、Mixer、SSE/APM、coder、block/type 路径和 archive format；所有新增结果必须与本节点的 `-1` 前缀 baseline 及 roundtrip 校验对比。
+
+回溯或查看该阶段：
+
+```powershell
+git switch --detach checkpoint/pre-major-refactor-20260827
+git show --stat checkpoint/pre-major-refactor-20260827
+```
+
 ## 许可证
 
 代码沿用 PAQ8px 的 GPL 许可。本研究分支没有另行改变许可条款。
