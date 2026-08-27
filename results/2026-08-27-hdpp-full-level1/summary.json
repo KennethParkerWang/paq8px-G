@@ -1,0 +1,18 @@
+{
+  "variant": "RANK1_HDPP_PREFIX256_LSTM",
+  "compression_level": "-1",
+  "corpus": "Silesia full files",
+  "files": 12,
+  "roundtrip_pass": 12,
+  "roundtrip_status": "PASS",
+  "total_input_bytes": 211938580,
+  "total_archive_bytes": 31554705,
+  "aggregate_bits_per_byte": 1.191088664,
+  "paired_baseline_scope": "sao only; no 12-file original-v216 full-file comparison is claimed",
+  "repaired_decode_rows": [
+    "xml",
+    "x-ray"
+  ],
+  "codec": "F:\\paq8px\\paq-default-research-20260820\\builds\\RANK1_HDP_PREFIX256_LSTM_20260820\\paq8px.exe",
+  "completed_utc": "2026-08-27T01:19:28.9091943Z"
+}

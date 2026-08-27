@@ -193,15 +193,34 @@ F:/paq8px/paq-default-research-20260820/runs-prefix-level1/EXP04A_CRRG_GLOBAL_L1
 
 在相同 `-8` 设置下，HDPP 相对 EXP03B 减少 `16 B`。`-8L` attribution control 为：EXP03B + existing LSTM `609,101 B`，HDPP + existing LSTM `609,083 B`，HDPP 的独立边际是 `18 B`。`-8L` 的大部分收益来自 PAQ v216 已有 LSTM，不能全部归因于 HDPP。
 
-## 完整文件结果的边界
+## 完整文件 `-1` 运行结果（2026-08-27）
 
-目前只有 `sao` 做过严格成对的完整文件 `-1` 对比：
+当前 HDPP executable 已在 12 个完整 Silesia 文件上完成一次 `-1` encode/decode：
+
+| 指标 | 值 |
+|---|---:|
+| 文件数 | 12 |
+| 严格 roundtrip | **12/12 PASS** |
+| 总输入 | 211,938,580 B |
+| 12 个独立 archive 合计 | 31,554,705 B |
+| 合计 bpb | 1.191088664 |
+
+每个 PASS 都重新检查了解码长度和 source/decoded 的 SHA-256。`xml` 是旧批处理在 `x-ray` 失败后没有进入 decode 阶段；`x-ray` 的旧 decoded 文件不完整。这两项均在新目录中独立重解码并通过校验，旧文件和旧日志没有覆盖。
+
+逐文件 archive 大小、输入/输出 SHA-256、耗时及修复来源在：
+
+```text
+results/2026-08-27-hdpp-full-level1/full_level1_results.csv
+results/2026-08-27-hdpp-full-level1/summary.json
+```
+
+这是一份**单版本完整文件运行结果**，不是完整 Silesia 的成对 baseline 对比。当前只有 `sao` 做过严格成对的完整文件 `-1` 对比：
 
 | 文件 | Original v216 `-1` | HDPP `-1` | 改善 |
 |---|---:|---:|---:|
 | `sao` 完整文件 | 3,769,793 B | 3,767,793 B | -2,000 B（约 -0.0531%） |
 
-该结果已通过 roundtrip，但不能写成“完整 Silesia 总体提升”。其余文件目前没有形成同一协议下完整成对结果，正式成果仍以 `32/64/128 KiB` 前缀协议为准。
+该结果已通过 roundtrip，但不能写成“完整 Silesia 总体提升”。其余 11 个文件目前尚未形成同一协议下 Original v216 `-1` 的完整文件 archive-size 对照；正式的 baseline 改进结论仍以 `32/64/128 KiB` 前缀协议为准。
 
 ## 源码与编译
 
